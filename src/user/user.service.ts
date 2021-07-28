@@ -33,8 +33,8 @@ export class UserService {
     return this.userRepository.update(userId, { password });
   }
 
-  async checkBy(field: string, value: string): Promise<number> {
-    return this.userRepository.count({ [field]: value });
+  async checkBy(...args: any[]): Promise<number> {
+    return this.userRepository.count({ where: args });
   }
 
   private static async hashPassword(password: string): Promise<string> {
