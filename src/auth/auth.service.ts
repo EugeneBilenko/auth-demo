@@ -31,11 +31,9 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    let check;
-    check = !!(await this.userService.checkBy('email', createUserDto.email));
-    check = !!(await this.userService.checkBy(
-      'username',
-      createUserDto.username,
+    const check = !!(await this.userService.checkBy(
+      { email: createUserDto.email },
+      { username: createUserDto.email },
     ));
     if (check) {
       throw new BadRequestException(
