@@ -1,12 +1,20 @@
-import { Entity, Column, PrimaryGeneratedColumn, BaseEntity, OneToOne } from 'typeorm';
-import { EmailToken } from '../../auth/email-token/email-token.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  OneToOne,
+} from 'typeorm';
+import { EmailToken } from '../auth/email-token/email-token.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   username: string;
 
   @Column({ select: false })

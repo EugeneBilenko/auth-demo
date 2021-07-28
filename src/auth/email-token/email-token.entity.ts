@@ -4,9 +4,10 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   OneToOne,
-  JoinColumn, Generated,
+  JoinColumn,
+  Generated,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '../../user/user.entity';
 
 @Entity('emailToken')
 export class EmailToken extends BaseEntity {

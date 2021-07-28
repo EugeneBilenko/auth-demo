@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
+import { User } from './user.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { genSalt, hash } from 'bcryptjs';
@@ -18,10 +18,9 @@ export class UserService {
     return user.save();
   }
 
-  async findOne(field: string, value: string): Promise<User> {
+  async findOne(conditions: Partial<User>): Promise<User> {
     return this.userRepository.findOne({
-      where: { [field]: value },
-      select: ['password', 'username', 'id'],
+      where: conditions,
     });
   }
 
@@ -29,12 +28,12 @@ export class UserService {
     userId: number,
     password: string,
   ): Promise<UpdateResult> {
-    password = await UserService.hashPassword(password);
-    return this.userRepository.update(userId, { password });
+    const newPassword = await UserService.hashPassword(password);
+    return this.userRepository.update(userId, { password: newPassword });
   }
 
-  async checkBy(...args: any[]): Promise<number> {
-    return this.userRepository.count({ where: args });
+  async checkIfExists(...conditions: Array<Partial<User>>): Promise<number> {
+    return this.userRepository.count({ where: conditions });
   }
 
   private static async hashPassword(password: string): Promise<string> {
