@@ -5,24 +5,22 @@ import {
   BaseEntity,
   OneToOne,
   JoinColumn,
-  Generated,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from './user.entity';
 
-@Entity('emailToken')
-export class EmailToken extends BaseEntity {
+@Entity('refreshToken')
+export class RefreshToken extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Generated('uuid')
   token: string;
 
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
 
-  constructor(data?: Partial<EmailToken>) {
+  constructor(data?: Partial<RefreshToken>) {
     super();
     Object.assign(this, data);
   }

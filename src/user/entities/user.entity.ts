@@ -3,9 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   BaseEntity,
-  OneToOne,
+  OneToOne, JoinColumn,
 } from 'typeorm';
-import { EmailToken } from '../auth/email-token/email-token.entity';
+import { EmailToken } from '../../auth/email-token/email-token.entity';
+import { RefreshToken } from './refresh-token.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -26,7 +27,11 @@ export class User extends BaseEntity {
   email: string;
 
   @OneToOne(() => EmailToken)
-  token: EmailToken;
+  token?: EmailToken;
+
+  @OneToOne(() => RefreshToken)
+  @JoinColumn()
+  refreshToken?: RefreshToken;
 
   constructor(data?: Partial<User>) {
     super();

@@ -1,8 +1,16 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Get,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RefreshPasswordDto } from './dto/refresh-password.dto';
 import { ConfirmTokenDto } from './dto/confirm-token.dto';
 import { LoginDto } from './dto/login.dto';
@@ -46,5 +54,17 @@ export class AuthController {
     if (result) {
       return { message: 'Password successfully updated' };
     }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Refresh token' })
+  @Get('refresh-token')
+  refreshToken(@Request() req) {
+    const token = req.headers.authorization;
+    if (!token) {
+      throw new UnauthorizedException();
+    }
+
+    return this.authService.refreshToken(token);
   }
 }

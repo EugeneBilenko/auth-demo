@@ -4,4 +4,5 @@ export interface MessageResponse {
 
 export interface TokenResponse {
   accessToken: string;
+  refreshToken: string;
 }

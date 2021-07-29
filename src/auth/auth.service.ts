@@ -1,17 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
-import { UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { RefreshPasswordDto } from './dto/refresh-password.dto';
 import { EmailTokenService } from './email-token/email-token.service';
 import { ConfirmTokenDto } from './dto/confirm-token.dto';
+import { RefreshToken } from '../user/entities/refresh-token.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TokenResponse } from './types';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly emailTokenService: EmailTokenService,
@@ -44,10 +53,39 @@ export class AuthService {
     return this.generateToken(user);
   }
 
-  private generateToken(user: User) {
+  async refreshToken(token: string): Promise<TokenResponse> {
+    const refreshToken = token.split(' ').pop();
+    const userToken = await this.findByToken(refreshToken);
+    if (!userToken) {
+      throw new UnauthorizedException();
+    }
+
+    return this.generateToken(userToken.user);
+  }
+
+  private async updateOrCreateRefreshToken(user: User, token): Promise<void> {
+    let refreshToken = await this.refreshTokenRepository.findOne({
+      where: { user },
+    });
+
+    if (!refreshToken) {
+      refreshToken = new RefreshToken({ user });
+    }
+
+    refreshToken.token = token;
+    refreshToken.save();
+  }
+
+  private async generateToken(user: User): Promise<TokenResponse> {
     const payload = { username: user.username, sub: user.id };
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '1 s',
+    });
+    this.updateOrCreateRefreshToken(user, refreshToken);
+
     return {
       accessToken: this.jwtService.sign(payload),
+      refreshToken,
     };
   }
 
@@ -75,6 +113,13 @@ export class AuthService {
     return this.userService.updatePassword(
       token.user.id,
       confirmTokenDto.password,
+    );
+  }
+
+  async findByToken(token: string): Promise<RefreshToken> {
+    return this.refreshTokenRepository.findOne(
+      { token },
+      { relations: ['user'] },
     );
   }
 }

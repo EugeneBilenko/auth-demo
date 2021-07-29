@@ -4,16 +4,17 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserService } from '../user/user.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { EmailTokenService } from './email-token/email-token.service';
 import { EmailToken } from './email-token/email-token.entity';
+import { RefreshToken } from '../user/entities/refresh-token.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, EmailToken]),
+    TypeOrmModule.forFeature([User, EmailToken, RefreshToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
