@@ -18,10 +18,10 @@ export class UserService {
     return user.save();
   }
 
-  async findOne(conditions: Partial<User>): Promise<User> {
+  async findOne(conditions: Partial<User>, password = false): Promise<User> {
     return this.userRepository.findOne({
       where: conditions,
-      select: ['username', 'password', 'email', 'id'],
+      ...(password ? { select: ['username', 'password', 'email', 'id'] } : {}),
     });
   }
 
