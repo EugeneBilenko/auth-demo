@@ -21,6 +21,7 @@ export class UserService {
   async findOne(conditions: Partial<User>): Promise<User> {
     return this.userRepository.findOne({
       where: conditions,
+      select: ['username', 'password', 'email', 'id'],
     });
   }
 
